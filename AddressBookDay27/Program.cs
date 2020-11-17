@@ -5,23 +5,22 @@
 // <creator Name="Nikhil Kumar yadav"/>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 using System;
 
 namespace AddressBook_AdoNet
 {
+    /// <summary>
+    /// Program Class
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome To Address Book AdoNet");
             AddressBookOperations addressBookOperations = new AddressBookOperations();
-            ContactDetails contactDetails = new ContactDetails();
-            contactDetails.firstName = "daisy";
-            contactDetails.lastName = "erison";
-            contactDetails.phoneNumber = 8111100011;
-            contactDetails.email = "eric@skype.com";
-            contactDetails.addressBookName = "First";
-            Console.WriteLine("bool value" + addressBookOperations.UpdateAddressBookDetails(contactDetails));
+            Console.WriteLine(addressBookOperations.GetContactDetailsBetweenDateRange());
+
         }
     }
 }
