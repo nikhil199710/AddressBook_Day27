@@ -5,7 +5,6 @@
 // <creator Name="Nikhil Kumar yadav"/>
 // --------------------------------------------------------------------------------------------------------------------
 
-
 using System;
 
 namespace AddressBook_AdoNet
@@ -19,8 +18,7 @@ namespace AddressBook_AdoNet
         {
             Console.WriteLine("Welcome To Address Book AdoNet");
             AddressBookOperations addressBookOperations = new AddressBookOperations();
-            Console.WriteLine(addressBookOperations.GetContactDetailsBetweenDateRange());
-
+            Console.WriteLine(addressBookOperations.GetContactDetailsBetweenDateRange() ? "Query Succesful " : "Failed");
         }
     }
 }

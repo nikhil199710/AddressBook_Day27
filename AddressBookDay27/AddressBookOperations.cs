@@ -183,7 +183,71 @@ namespace AddressBook_AdoNet
             }
             return false;
         }
+
+        /// <summary>
+        /// Get Contact Details by city or state
+        /// UC19
+        /// </summary>
+        /// <returns></returns>
+        public bool GetContactsByCityOrState()
+        {
+            List<ContactDetails> ListOfContacts = new List<ContactDetails>();
+            ///Getting connection
+            SqlConnection sqlConnection = dBConnection.GetConnection();
+            try
+            {
+                using (sqlConnection)
+                {
+                    ///using stored procedure
+                    string query = "select * from address_book_table a join complete_address c on a.CompleteAddressId=c.CompleteAddressId where c.city='delhi' ";
+                    SqlCommand command = new SqlCommand(query, sqlConnection);
+                    ///opening connection
+                    sqlConnection.Open();
+                    SqlDataReader dr = command.ExecuteReader();
+                    ///checking if rows are there
+                    if (dr.HasRows)
+                    {
+                        ///reading till there are rows
+                        while (dr.Read())
+                        {
+                            ContactDetails contactDetails = new ContactDetails();
+                            contactDetails.firstName = Convert.ToString(dr["firstname"]);
+                            contactDetails.lastName = Convert.ToString(dr["lastname"]);
+                            contactDetails.address = Convert.ToString(dr["address"]);
+                            contactDetails.city = Convert.ToString(dr["city"]);
+                            contactDetails.state = Convert.ToString(dr["state"]);
+                            contactDetails.zip = Convert.ToInt32(dr["zip"]);
+                            contactDetails.phoneNumber = Convert.ToDouble(dr["phonenumber"]);
+                            contactDetails.email = Convert.ToString(dr["email"]);
+                            contactDetails.addressBookId = Convert.ToInt32(dr["AddressBookId"]);
+                            contactDetails.completeAddressId = Convert.ToInt32(dr["CompleteAddressId"]);
+                            contactDetails.addressBookName = Convert.ToString(dr["addressBookName"]);
+                            contactDetails.start = Convert.ToDateTime(dr["start"]);
+                            ListOfContacts.Add(contactDetails);
+                        }
+                        ///closing reader and connection
+                        dr.Close();
+                        sqlConnection.Close();
+                        return true;
+
+                    }
+                    else
+                    {
+                        throw new Exception("No data Found");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
+        }
     }
 }
-    }
-}
+ 
