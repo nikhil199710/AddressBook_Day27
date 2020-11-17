@@ -6,6 +6,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace AddressBook_AdoNet
 {
@@ -19,22 +20,23 @@ namespace AddressBook_AdoNet
             Console.WriteLine("Welcome To Address Book AdoNet");
             AddressBookOperations addressBookOperations = new AddressBookOperations();
             ContactDetails contactDetails = new ContactDetails();
-            contactDetails.firstName = "AAYAM";
+            contactDetails.firstName = "AAYAm";
             contactDetails.lastName = "kumar";
-            contactDetails.phoneNumber = 87215447;
+            contactDetails.phoneNumber = 877655447;
             contactDetails.email = "aa@gmail.com";
-            contactDetails.city = "bop";
+            contactDetails.city = "kol";
             contactDetails.start = Convert.ToDateTime("1/2/2018");
             contactDetails.state = "wb";
             contactDetails.addressBookId = 6;
             contactDetails.completeAddressId = 106;
             contactDetails.addressBookName = "First";
             contactDetails.address = "street 1";
-            contactDetails.zip = 6265165;
+            contactDetails.zip = 284515;
             contactDetails.typeId = 1;
             contactDetails.typeName = "Friends";
-            Console.WriteLine(addressBookOperations.AddingContactDetailsInDatabase(contactDetails) ? "Query Succesful for between DateRange " : "Failed");
-            //Console.WriteLine(addressBookOperations.GetContactsByCityOrState() ? "Query Succesful For Get by city " : "Failed");
+            List<ContactDetails> listOfContactsToBeAdded = new List<ContactDetails>();
+            listOfContactsToBeAdded.Add(contactDetails);
+            addressBookOperations.AddingMultipleContactDetailsUsingThreading(listOfContactsToBeAdded);
 
         }
     }
