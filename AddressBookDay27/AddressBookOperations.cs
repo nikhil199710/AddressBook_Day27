@@ -1,9 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file=" AddressBookOperations.cs" company="Capgemini">
+// <copyright file="Program.cs" company="Capgemini">
 //   Copyright © 2018 Company
 // </copyright>
 // <creator Name="Nikhil Kumar yadav"/>
 // --------------------------------------------------------------------------------------------------------------------
+
 
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace AddressBook_AdoNet
         /// UC16
         /// </summary>
         /// <returns></returns>
-        public List<ContactDetails> GetAllContactDetails()
+        public void GetAllContactDetails()
         {
             List<ContactDetails> ListOfContacts = new List<ContactDetails>();
             ///Getting connection
@@ -38,7 +39,7 @@ namespace AddressBook_AdoNet
                 using (sqlConnection)
                 {
                     ///using stored procedure
-                    SqlCommand command = new SqlCommand("GetContactDetails", sqlConnection);
+                    SqlCommand command = new SqlCommand("dbo.spGetAllContacts", sqlConnection);
                     command.CommandType = System.Data.CommandType.StoredProcedure;
                     ///opening connection
                     sqlConnection.Open();
@@ -50,26 +51,27 @@ namespace AddressBook_AdoNet
                         while (dr.Read())
                         {
                             ContactDetails contactDetails = new ContactDetails();
-                            contactDetails.firstName = dr.GetString(0);
-                            contactDetails.lastName = dr.GetString(1);
-                            contactDetails.address = dr.GetString(2);
-                            contactDetails.city = dr.GetString(3);
-                            contactDetails.state = dr.GetString(4);
-                            contactDetails.zip = dr.GetInt32(5);
-                            contactDetails.phoneNumber = dr.GetFloat(6);
-                            contactDetails.email = dr.GetString(7);
-                            contactDetails.addressBookId = dr.GetInt32(8);
-                            contactDetails.completeAddressId = dr.GetInt32(9);
-                            contactDetails.addressBookName = dr.GetString(10);
-                            contactDetails.typeId = dr.GetInt32(11);
-                            contactDetails.typeName = dr.GetString(12);
+                            contactDetails.firstName = Convert.ToString(dr["firstname"]);
+                            contactDetails.lastName = Convert.ToString(dr["lastname"]);
+                            contactDetails.address = Convert.ToString(dr["address"]);
+                            contactDetails.city = Convert.ToString(dr["city"]);
+                            contactDetails.state = Convert.ToString(dr["state"]);
+                            contactDetails.zip = Convert.ToInt32(dr["zip"]);
+                            contactDetails.phoneNumber = Convert.ToDouble(dr["phonenumber"]);
+                            contactDetails.email = Convert.ToString(dr["email"]);
+                            contactDetails.addressBookId = Convert.ToInt32(dr["AddressBookId"]);
+                            contactDetails.completeAddressId = Convert.ToInt32(dr["CompleteAddressId"]);
+                            contactDetails.addressBookName = Convert.ToString(dr["addressBookName"]);
+                            contactDetails.typeId = Convert.ToInt32(dr["TypeId"]);
+                            contactDetails.typeName = Convert.ToString(dr["TypeName"]);
+                            contactDetails.start = Convert.ToDateTime(dr["start"]);
                             ListOfContacts.Add(contactDetails);
                         }
                         ///closing reader and connection
                         dr.Close();
                         sqlConnection.Close();
-                        ///returning list 
-                        return ListOfContacts;
+                        //return true;
+
                     }
                     else
                     {
@@ -80,11 +82,12 @@ namespace AddressBook_AdoNet
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return ListOfContacts;
+
             }
             finally
             {
-                sqlConnection.Close();
+                if (sqlConnection.State == System.Data.ConnectionState.Open)
+                    sqlConnection.Close();
             }
         }
 
@@ -104,7 +107,7 @@ namespace AddressBook_AdoNet
                 using (sqlConnection)
                 {
                     ///stored procedure
-                    SqlCommand command = new SqlCommand("spUpdateContactDetails", sqlConnection);
+                    SqlCommand command = new SqlCommand("dbo.spUpdateContactDetails", sqlConnection);
                     ///changing command type to stored procedure
                     command.CommandType = System.Data.CommandType.StoredProcedure;
                     ///adding value using cmd
@@ -128,6 +131,11 @@ namespace AddressBook_AdoNet
             {
                 throw new Exception(ex.Message);
             }
+            finally
+            {
+                if (sqlConnection.State == System.Data.ConnectionState.Open)
+                    sqlConnection.Close();
+            }
         }
 
         /// <summary>
@@ -145,7 +153,7 @@ namespace AddressBook_AdoNet
                 using (connection)
                 {
                     ///query
-                    string query = "select * from address_book_table where dateadded between cast('2016-01-01' as date) and GETDATE()";
+                    string query = "select * from address_book_table where start between cast('2016-01-01' as date) and GETDATE()";
                     SqlCommand command = new SqlCommand(query, connection);
                     ///openning connection
                     connection.Open();
@@ -157,14 +165,14 @@ namespace AddressBook_AdoNet
                         {
                             ///reading
                             ContactDetails contactDetails = new ContactDetails();
-                            contactDetails.firstName = dr.GetString(0);
-                            contactDetails.lastName = dr.GetString(1);
-                            contactDetails.phoneNumber = dr.GetFloat(2);
-                            contactDetails.email = dr.GetString(3);
-                            contactDetails.addressBookName = dr.GetString(4);
-                            contactDetails.addressBookId = dr.GetInt32(5);
-                            contactDetails.completeAddressId = dr.GetInt32(6);
-                            contactDetails.start = dr.GetDateTime(7);
+                            contactDetails.firstName = Convert.ToString(dr["firstname"]);
+                            contactDetails.lastName = Convert.ToString(dr["lastname"]);
+                            contactDetails.phoneNumber = Convert.ToDouble(dr["phonenumber"]);
+                            contactDetails.email = Convert.ToString(dr["email"]);
+                            contactDetails.addressBookId = Convert.ToInt32(dr["AddressBookId"]);
+                            contactDetails.completeAddressId = Convert.ToInt32(dr["CompleteAddressId"]);
+                            contactDetails.addressBookName = Convert.ToString(dr["addressBookName"]);
+                            contactDetails.start = Convert.ToDateTime(dr["start"]);
                             dr.Close();
                             connection.Close();
                             return true;
@@ -181,11 +189,16 @@ namespace AddressBook_AdoNet
                 throw new Exception(ex.Message);
 
             }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
             return false;
         }
 
         /// <summary>
-        /// Get Contact Details by city or state
+        /// Get Contacts By City Or State
         /// UC19
         /// </summary>
         /// <returns></returns>
@@ -245,9 +258,62 @@ namespace AddressBook_AdoNet
             }
             finally
             {
-                sqlConnection.Close();
+                if (sqlConnection.State == System.Data.ConnectionState.Open)
+                    sqlConnection.Close();
+            }
+        }
+
+        /// <summary>
+        /// Adding Contact Details In Database
+        /// UC20
+        /// </summary>
+        /// <param name="contactDetails"></param>
+        /// <returns></returns>
+        public bool AddingContactDetailsInDatabase(ContactDetails contactDetails)
+        {
+            SqlConnection connection = dBConnection.GetConnection();
+            try
+            {
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("dbo.spInsertData", connection);
+                    ///changing command type to stored procedure
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@firstname", contactDetails.firstName);
+                    command.Parameters.AddWithValue("@lastname", contactDetails.lastName);
+                    command.Parameters.AddWithValue("@phonenumber", contactDetails.phoneNumber);
+                    command.Parameters.AddWithValue("@email", contactDetails.email);
+                    command.Parameters.AddWithValue("@addressBookName", contactDetails.addressBookName);
+                    command.Parameters.AddWithValue("@AddressBookId", contactDetails.addressBookId);
+                    command.Parameters.AddWithValue("@CompleteAddressId", contactDetails.completeAddressId);
+                    command.Parameters.AddWithValue("@start", contactDetails.start);
+                    command.Parameters.AddWithValue("@address", contactDetails.address);
+                    command.Parameters.AddWithValue("@city", contactDetails.city);
+                    command.Parameters.AddWithValue("@state", contactDetails.state);
+                    command.Parameters.AddWithValue("@zip", contactDetails.zip);
+                    command.Parameters.AddWithValue("@TypeId", contactDetails.typeId);
+                    command.Parameters.AddWithValue("@TypeName", contactDetails.typeName);
+                    ///opening connection
+                    connection.Open();
+                    int result = command.ExecuteNonQuery();
+                    if (result != 0)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
             }
         }
     }
 }
- 
