@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Text;
+using System.Threading;
 
 namespace AddressBook_AdoNet
 {
@@ -39,7 +40,7 @@ namespace AddressBook_AdoNet
                 using (sqlConnection)
                 {
                     ///using stored procedure
-                    SqlCommand command = new SqlCommand("dbo.spGetAllContacts", sqlConnection);
+                    SqlCommand command = new SqlCommand("dbo.spGetContactsDetails", sqlConnection);
                     command.CommandType = System.Data.CommandType.StoredProcedure;
                     ///opening connection
                     sqlConnection.Open();
@@ -64,7 +65,7 @@ namespace AddressBook_AdoNet
                             contactDetails.addressBookName = Convert.ToString(dr["addressBookName"]);
                             contactDetails.typeId = Convert.ToInt32(dr["TypeId"]);
                             contactDetails.typeName = Convert.ToString(dr["TypeName"]);
-                            contactDetails.start = Convert.ToDateTime(dr["start"]);
+                            contactDetails.start = Convert.ToDateTime(dr["start"]);                           
                             ListOfContacts.Add(contactDetails);
                         }
                         ///closing reader and connection
@@ -166,13 +167,13 @@ namespace AddressBook_AdoNet
                             ///reading
                             ContactDetails contactDetails = new ContactDetails();
                             contactDetails.firstName = Convert.ToString(dr["firstname"]);
-                            contactDetails.lastName = Convert.ToString(dr["lastname"]);
+                            contactDetails.lastName = Convert.ToString(dr["lastname"]);                           
                             contactDetails.phoneNumber = Convert.ToDouble(dr["phonenumber"]);
                             contactDetails.email = Convert.ToString(dr["email"]);
                             contactDetails.addressBookId = Convert.ToInt32(dr["AddressBookId"]);
                             contactDetails.completeAddressId = Convert.ToInt32(dr["CompleteAddressId"]);
                             contactDetails.addressBookName = Convert.ToString(dr["addressBookName"]);
-                            contactDetails.start = Convert.ToDateTime(dr["start"]);
+                            contactDetails.start = Convert.ToDateTime(dr["start"]);                          
                             dr.Close();
                             connection.Close();
                             return true;
@@ -213,7 +214,7 @@ namespace AddressBook_AdoNet
                 {
                     ///using stored procedure
                     string query = "select * from address_book_table a join complete_address c on a.CompleteAddressId=c.CompleteAddressId where c.city='delhi' ";
-                    SqlCommand command = new SqlCommand(query, sqlConnection);
+                    SqlCommand command = new SqlCommand(query, sqlConnection);              
                     ///opening connection
                     sqlConnection.Open();
                     SqlDataReader dr = command.ExecuteReader();
@@ -234,9 +235,9 @@ namespace AddressBook_AdoNet
                             contactDetails.email = Convert.ToString(dr["email"]);
                             contactDetails.addressBookId = Convert.ToInt32(dr["AddressBookId"]);
                             contactDetails.completeAddressId = Convert.ToInt32(dr["CompleteAddressId"]);
-                            contactDetails.addressBookName = Convert.ToString(dr["addressBookName"]);
+                            contactDetails.addressBookName = Convert.ToString(dr["addressBookName"]);                   
                             contactDetails.start = Convert.ToDateTime(dr["start"]);
-                            ListOfContacts.Add(contactDetails);
+                            ListOfContacts.Add(contactDetails);                           
                         }
                         ///closing reader and connection
                         dr.Close();
@@ -293,7 +294,7 @@ namespace AddressBook_AdoNet
                     command.Parameters.AddWithValue("@zip", contactDetails.zip);
                     command.Parameters.AddWithValue("@TypeId", contactDetails.typeId);
                     command.Parameters.AddWithValue("@TypeName", contactDetails.typeName);
-                    ///opening connection
+                    ///opening connection   2WW
                     connection.Open();
                     int result = command.ExecuteNonQuery();
                     if (result != 0)
@@ -315,5 +316,31 @@ namespace AddressBook_AdoNet
                     connection.Close();
             }
         }
+
+        /// <summary>
+        /// Adding Multiple Contact Details Using Threading
+        /// UC21
+        /// </summary>
+        /// <param name="contactDetails"></param>
+        public void AddingMultipleContactDetailsUsingThreading(List<ContactDetails> contactDetails)
+        {
+            ///In this we are passing a list and for each contact in the list different thread is being vrear
+            contactDetails.ForEach(contact =>
+            {              
+                Thread thread = new Thread(() =>
+                {
+                    Console.WriteLine("Address being added" + contact.firstName);
+                    AddingContactDetailsInDatabase(contact);                  
+                    Console.WriteLine("Thread Number: " + Thread.CurrentThread.ManagedThreadId);
+                    Console.WriteLine("Contact added:" + contact.firstName);
+                });      
+                ///thread start
+                thread.Start();  
+                ///wait until current thread is executed
+                thread.Join();
+            });
+        }
     }
 }
+
+    
